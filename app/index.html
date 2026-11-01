@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>キャラ組み立てDB</title>
+<meta name="description" content="髪型・衣装・ポーズを選ぶだけで、そのまま貼れるプロンプトが完成するデータベース">
+<style>
+:root{--bg:#0f0f13;--panel:#17171d;--panel2:#1f1f27;--line:#2a2a35;--tx:#f2f2f5;--mute:#9a9aa8;--acc:#ff2d8a;--acc2:#ff7ab8;--ok:#3ddc97;--chip:#262632}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic","Meiryo",sans-serif;font-size:14px;line-height:1.5}
+a{color:var(--acc2)}button{font-family:inherit;cursor:pointer}
+header{position:sticky;top:0;z-index:20;background:rgba(15,15,19,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.hd{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{font-weight:900;font-size:18px;letter-spacing:.02em}.logo span{color:var(--acc)}
+.sub{color:var(--mute);font-size:12px}
+nav.tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav.tabs button{background:transparent;border:1px solid var(--line);color:var(--tx);padding:7px 12px;border-radius:999px;font-weight:700}
+nav.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+nav.tabs button .n{font-weight:400;color:var(--mute);font-size:11px;margin-left:4px}nav.tabs button.on .n{color:#ffd6e8}
+main{max-width:1280px;margin:0 auto;padding:14px 16px 120px}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.bar input[type=search]{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);color:var(--tx);padding:9px 12px;border-radius:10px;font-size:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:var(--chip);border:1px solid transparent;color:var(--tx);padding:5px 10px;border-radius:999px;font-size:12px}
+.chip.on{border-color:var(--acc);color:#fff;background:#3a1230}.chip .n{color:var(--mute);margin-left:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+@media(max-width:520px){.grid{grid-template-columns:1fr 1fr;gap:8px}.card .bt{gap:4px}.card .bt button{font-size:11px;padding:7px 2px}.card .jp{font-size:13px}.card .tg{font-size:10px}}  /* スマホは2列 */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.card.sel{border-color:var(--acc);box-shadow:0 0 0 2px rgba(255,45,138,.35)}
+.card .im{position:relative;background:#fff;cursor:zoom-in}
+.card .im img{width:100%;display:block;aspect-ratio:2/3;object-fit:cover}
+.card.hair .im img{aspect-ratio:1/1;object-position:top}
+.card .im .id{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:2px 7px;border-radius:6px;font-weight:700}
+.card .im .fav{position:absolute;right:6px;top:6px;background:rgba(0,0,0,.55);border:0;color:#fff;border-radius:999px;width:30px;height:30px;font-size:16px}
+.card .im .fav.on{color:#ffd54a}
+.card .bd{padding:9px 10px 10px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card .jp{font-weight:800;font-size:14px}
+.card .tg{font-size:11px;color:var(--mute);line-height:1.35;word-break:break-all;max-height:3.9em;overflow:hidden}
+.card .sw{display:flex;gap:5px}.sw button{width:20px;height:20px;border-radius:50%;border:2px solid #fff3;padding:0}.sw button.on{border-color:#fff;box-shadow:0 0 0 2px var(--acc)}
+.card .bt{display:flex;gap:6px;margin-top:auto}
+.card .bt button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--tx);padding:7px 4px;border-radius:9px;font-size:12px;font-weight:700}
+.card .bt button.p{background:var(--acc);border-color:var(--acc);color:#fff}
+.card .bt button.ok{background:#1d3b2f;border-color:var(--ok);color:var(--ok)}
+.vw{display:flex;gap:4px;position:absolute;left:8px;bottom:8px}.vw button{background:rgba(0,0,0,.6);border:0;color:#fff;font-size:11px;padding:3px 8px;border-radius:6px}.vw button.on{background:var(--acc)}
+.empty{color:var(--mute);padding:40px;text-align:center}
+/* builder */
+.bl{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:860px){.bl{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.box h3{margin:0 0 10px;font-size:14px;color:var(--acc2)}
+.slot{display:flex;align-items:center;gap:10px;padding:8px;border:1px dashed var(--line);border-radius:10px;margin-bottom:8px;background:var(--panel2)}
+.slot img{width:46px;height:60px;object-fit:cover;border-radius:6px;background:#fff}
+.slot .lb{font-size:11px;color:var(--mute)}.slot .v{font-weight:700}.slot .x{margin-left:auto;background:transparent;border:1px solid var(--line);color:var(--mute);border-radius:8px;padding:4px 8px}
+.slot.empty .v{color:var(--mute);font-weight:400}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+.row label{font-size:12px;color:var(--mute);min-width:64px}
+select,.row input[type=text]{background:var(--panel2);border:1px solid var(--line);color:var(--tx);padding:7px 9px;border-radius:9px;font-size:13px;flex:1;min-width:120px}
+textarea{width:100%;min-height:150px;background:#0b0b0f;color:#e8ffe8;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.5;resize:vertical}
+textarea.neg{color:#ffd6d6;min-height:70px}
+.big{background:var(--acc);border:0;color:#fff;font-weight:900;padding:12px 16px;border-radius:12px;font-size:15px;width:100%}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--tx);padding:9px 12px;border-radius:10px;font-weight:700}
+.sticky{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(23,23,29,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px)}
+.sticky .in{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sticky .sl{display:flex;gap:6px;flex-wrap:nowrap;flex:1;overflow-x:auto;scrollbar-width:none}.sticky .sl span{background:var(--chip);padding:4px 9px;border-radius:999px;font-size:12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:700px){.sticky .sl{flex-basis:100%}.sticky .in{padding:8px 12px;gap:8px}.big{padding:10px 12px;font-size:14px}.ghost{padding:8px 10px}}
+.sticky .sl span b{color:var(--acc2);margin-right:4px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ok);color:#06251a;font-weight:800;padding:10px 16px;border-radius:999px;opacity:0;transition:.2s;z-index:40;pointer-events:none}
+.toast.on{opacity:1}
+.lb-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.lb-ov.on{display:flex}.lb-ov img{max-width:100%;max-height:92vh;border-radius:8px;background:#fff}
+.lb-ov .cap{position:absolute;left:0;right:0;bottom:12px;text-align:center;color:#fff;font-size:13px}
+.help{max-width:820px}.help h2{font-size:18px;margin:22px 0 8px;color:var(--acc2)}.help p,.help li{color:#d8d8e0}.help code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
+.lock{background:linear-gradient(135deg,#2a1020,#1a1a24);border:1px solid #5a1c3f;border-radius:14px;padding:14px 16px;margin:10px 0 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.lock b{color:var(--acc2)}.lock a.btn{background:var(--acc);color:#fff;text-decoration:none;font-weight:800;padding:9px 14px;border-radius:10px;margin-left:auto}
+.kbd{font-size:11px;color:var(--mute)}
+</style>
+</head>
+<body>
+<header><div class="hd">
+  <div><div class="logo">キャラ<span>組み立て</span>DB</div><div class="sub">髪型・目・衣装・ポーズを選ぶだけで、そのまま貼れるプロンプトが完成する</div></div>
+  <nav class="tabs" id="tabs"></nav>
+</div></header>
+<main>
+  <section id="view"></section>
+</main>
+<div class="sticky" id="sticky"><div class="in">
+  <div class="sl" id="stickySel"></div>
+  <button class="ghost" id="btnRandom">🎲 ランダム</button>
+  <button class="big" style="width:auto" id="btnGoBuild">組み立てを見る →</button>
+</div></div>
+<div class="toast" id="toast">コピーしました</div>
+<div class="lb-ov" id="lb"><img id="lbImg" alt=""><div class="cap" id="lbCap"></div></div>
+<script src="data.js"></script>
+<script>
+const DB = window.DB; const ITEMS = DB.items; const TIER = DB.tier; const LINE_URL = DB.line_url || '#';
+const SETS = [['hair','髪型'],['outfit','衣装'],['pose','ポーズ'],['build','組み立て'],['help','使い方']];
+const byId = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+const state = { tab: 'hair', q: '', cat: {hair:'', outfit:'', pose:''}, favOnly: false,
+  sel: load('sel', {style:null, bangs:null, color:null, acc:null, eye:null, outfit:null, pose:null, styleColor:'brown'}),
+  fav: new Set(load('fav', [])), opt: load('opt', {prefix:'illustrious', expr:'smile', bg:'simple background, white background', cam:'full body', extra:'', fmt:'comma'}) };
+function load(k, d){ try{ const v = localStorage.getItem('cdb_'+k); return v ? JSON.parse(v) : d }catch(e){ return d } }
+function save(){ try{ localStorage.setItem('cdb_sel', JSON.stringify(state.sel)); localStorage.setItem('cdb_fav', JSON.stringify([...state.fav])); localStorage.setItem('cdb_opt', JSON.stringify(state.opt)) }catch(e){} }
+const $ = s => document.querySelector(s);
+function toast(m){ const t=$('#toast'); t.textContent=m||'コピーしました'; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1400) }
+async function copy(s){ try{ await navigator.clipboard.writeText(s); toast() }catch(e){ const ta=document.createElement('textarea'); ta.value=s; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast() } }
+const COLOR_HEX = {brown:'#6b3e26', black:'#15151a', blonde:'#f3d36b', pink:'#ff8fc8', silver:'#cfd3dc'};
+const COLOR_JP = {brown:'茶', black:'黒', blonde:'金', pink:'ピンク', silver:'銀'};
+const COLOR_TAG = {brown:'brown hair', black:'black hair', blonde:'blonde hair', pink:'pink hair', silver:'silver hair'};
+
+// ---------- tabs ----------
+function renderTabs(){
+  $('#tabs').innerHTML = SETS.map(([k,l]) => { const n = ['hair','outfit','pose'].includes(k) ? ITEMS.filter(i=>i.set===k && !i.parent).length : ''; return `<button class="${state.tab===k?'on':''}" data-t="${k}">${l}${n?`<span class="n">${n}</span>`:''}</button>` }).join('');
+  $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => { state.tab = b.dataset.t; render() });
+}
+// ---------- list ----------
+function visible(set){ return ITEMS.filter(i => i.set===set && !i.parent) }
+function cardHTML(i){
+  const set = i.set; const sel = state.sel;
+  const isSel = (set==='hair' && [sel.style, sel.bangs, sel.color, sel.acc, sel.eye].includes(i.id)) || (set==='outfit' && sel.outfit===i.id) || (set==='pose' && sel.pose===i.id);
+  let img = `img/${i.id}.jpg`, thumb = `thumb/${i.id}.webp`;
+  let sw = '';
+  if (set==='hair' && i.sub==='style'){
+    const c = isSel ? sel.styleColor : (i._c || 'brown');
+    if (c !== 'brown'){ const v = `${i.id}-${c}`; if (byId[v]){ img = `img/${v}.jpg`; thumb = `thumb/${v}.webp` } }
+    sw = `<div class="sw">${Object.keys(COLOR_HEX).map(k => byId[k==='brown'?i.id:`${i.id}-${k}`] ? `<button title="${COLOR_JP[k]}" style="background:${COLOR_HEX[k]}" class="${c===k?'on':''}" data-sw="${k}"></button>` : '').join('')}</div>`;
+  }
+  let vw = '';
+  if (set==='pose' && i.line){ const m = i._v || 'img'; if (m==='line'){ img = `line/${i.id}.png`; thumb = `line/${i.id}.png` } vw = `<div class="vw"><button class="${m==='img'?'on':''}" data-vw="img">絵</button><button class="${m==='line'?'on':''}" data-vw="line">線画</button></div>` }
+  const addLabel = set==='hair' ? ({style:'髪型に入れる', bangs:'前髪に入れる', color:'髪色に入れる', acc:'髪飾りに入れる', eye:'目に入れる'})[i.sub] : (set==='outfit' ? '衣装に入れる' : 'ポーズに入れる');
+  return `<div class="card ${set} ${isSel?'sel':''}" data-id="${i.id}">
+    <div class="im"><img loading="lazy" src="${thumb}" data-full="${img}" alt="${i.jp}"><div class="id">${i.id}</div><button class="fav ${state.fav.has(i.id)?'on':''}" data-fav="${i.id}" title="お気に入り">★</button>${vw}</div>
+    <div class="bd"><div class="jp">${i.jp}</div><div class="tg">${i.tags}</div>${sw}
+    <div class="bt"><button data-copy="${i.id}">タグをコピー</button><button class="${isSel?'ok':'p'}" data-add="${i.id}">${isSel?'✓ 入れた':addLabel}</button></div></div></div>`;
+}
+function renderList(set){
+  const all = visible(set);
+  const cats = [...new Set(all.map(i=>i.cat))];
+  const q = state.q.trim().toLowerCase();
+  let rows = all.filter(i => (!state.cat[set] || i.cat===state.cat[set]) && (!state.favOnly || state.fav.has(i.id)) && (!q || i.jp.toLowerCase().includes(q) || i.tags.toLowerCase().includes(q) || i.cat.includes(q)));
+  const lock = TIER==='public' ? `<div class="lock"><div><b>公開版</b>です。ランジェリー・セクシー衣装、攻めたポーズ、原寸PNGの一括ダウンロード(全${DB.total_full}枚)は、たきのオープンチャットで配っています。</div><a class="btn" href="${LINE_URL}" target="_blank" rel="noopener">特典版を受け取る</a></div>`
+    : (DB.zip_url ? `<div class="lock"><div><b>特典版</b>です。全${DB.total_full}枚(原寸JPG＋ポーズ線画＋タグ一覧CSV)をまとめて落とせます。約190MB。</div><a class="btn" href="${DB.zip_url}" rel="noopener">一括ダウンロード(zip)</a></div>` : '');
+  $('#view').innerHTML = `${lock}<div class="bar"><input type="search" id="q" placeholder="日本語でもタグでも検索 (例: ツインテール / serafuku / 水着)" value="${state.q.replace(/"/g,'&quot;')}"><button class="chip ${state.favOnly?'on':''}" id="favOnly">★ お気に入りだけ</button><span class="kbd">${rows.length}件</span></div>
+    <div class="chips"><button class="chip ${!state.cat[set]?'on':''}" data-cat="">すべて<span class="n">${all.length}</span></button>${cats.map(c=>`<button class="chip ${state.cat[set]===c?'on':''}" data-cat="${c}">${c}<span class="n">${all.filter(i=>i.cat===c).length}</span></button>`).join('')}</div>
+    <div class="grid" id="grid">${rows.map(cardHTML).join('') || '<div class="empty">見つかりませんでした</div>'}</div>`;
+  $('#q').oninput = e => { state.q = e.target.value; const g=$('#grid'); const qq=state.q.trim().toLowerCase(); const rr = all.filter(i => (!state.cat[set] || i.cat===state.cat[set]) && (!state.favOnly || state.fav.has(i.id)) && (!qq || i.jp.toLowerCase().includes(qq) || i.tags.toLowerCase().includes(qq) || i.cat.includes(qq))); g.innerHTML = rr.map(cardHTML).join('') || '<div class="empty">見つかりませんでした</div>'; bindGrid(set); $('.kbd').textContent = rr.length+'件' };
+  $('#favOnly').onclick = () => { state.favOnly = !state.favOnly; render() };
+  document.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { state.cat[set] = b.dataset.cat; render() });
+  bindGrid(set);
+}
+function bindGrid(set){
+  const g = $('#grid');
+  g.onclick = e => {
+    const t = e.target.closest('button, .im img'); if (!t) return;
+    const card = e.target.closest('.card'); const id = card && card.dataset.id; const it = byId[id];
+    if (t.dataset.copy){ copy(tagsOf(it, card)); return }
+    if (t.dataset.fav){ state.fav.has(id) ? state.fav.delete(id) : state.fav.add(id); save(); t.classList.toggle('on'); return }
+    if (t.dataset.sw){ it._c = t.dataset.sw; if (isSelected(it)) { state.sel.styleColor = t.dataset.sw; save() } card.outerHTML = cardHTML(it); updateSticky(); return }
+    if (t.dataset.vw){ it._v = t.dataset.vw; card.outerHTML = cardHTML(it); return }
+    if (t.dataset.add){ addToBuild(it, card); return }
+    if (t.tagName==='IMG'){ openLB(t.dataset.full, `${it.id} ${it.jp} — ${it.tags}`); }
+  };
+}
+function isSelected(i){ const s=state.sel; return [s.style,s.bangs,s.color,s.acc,s.eye,s.outfit,s.pose].includes(i.id) }
+function tagsOf(i, card){
+  if (i.set==='hair' && i.sub==='style'){ const c = (isSelected(i) ? state.sel.styleColor : (i._c||'brown')); return `${i.tags}, ${COLOR_TAG[c]}` }
+  return i.tags;
+}
+function addToBuild(i, card){
+  const s = state.sel;
+  if (i.set==='hair'){ const k = i.sub; if (s[k]===i.id){ s[k]=null } else { s[k]=i.id; if (k==='style') s.styleColor = i._c || 'brown'; } }
+  else if (i.set==='outfit'){ s.outfit = s.outfit===i.id ? null : i.id }
+  else if (i.set==='pose'){ s.pose = s.pose===i.id ? null : i.id }
+  save(); toast(isSelected(i) ? '組み立てに入れました' : '外しました');
+  // 同じ枠の別カードの表示も直す
+  document.querySelectorAll('.card').forEach(c => { const it = byId[c.dataset.id]; if (it) c.outerHTML = cardHTML(it) });
+  updateSticky();
+}
+// ---------- builder ----------
+const PREFIX = {
+  illustrious: ['Illustrious / Noob 系', 'masterpiece, best quality, amazing quality, very aesthetic, absurdres, newest', 'lowres, worst quality, low quality, bad anatomy, bad hands, extra fingers, missing fingers, text, watermark, signature, jpeg artifacts, multiple views'],
+  anima: ['Anima 系', 'masterpiece, best quality, score_7, safe', 'worst quality, low quality, score_1, score_2, score_3, jpeg artifacts, sepia, artist name, bad anatomy, bad hands, text, watermark'],
+  novelai: ['NovelAI', 'best quality, amazing quality, very aesthetic, absurdres', 'lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract]'],
+  sdxl: ['SDXL / Pony 系', 'score_9, score_8_up, score_7_up, masterpiece, best quality', 'score_1, score_2, score_3, lowres, bad anatomy, bad hands, text, watermark'],
+  none: ['なし(自分で足す)', '', ''] };
+const EXPR = [['smile','笑顔'],['light smile','微笑み'],['grin','ニカッ'],['closed mouth','口を閉じる'],['open mouth','口を開ける'],['blush','赤面'],['blush, embarrassed','照れ'],['expressionless','無表情'],['serious','真剣'],['angry','怒り'],['pout','むくれ'],['sad, tears','泣き'],['surprised','驚き'],['half-closed eyes, smirk','ジト目でニヤリ'],['wink','ウインク'],['tongue out','舌出し'],['seductive smile','妖しい笑み'],['','指定なし']];
+const BGS = [['simple background, white background','白背景'],['simple background, grey background','グレー背景'],['classroom, indoors','教室'],['bedroom, indoors, bed','寝室'],['living room, indoors, window, sunlight','リビング'],['street, city, outdoors','街'],['beach, ocean, sky, outdoors','ビーチ'],['park, trees, outdoors, sunlight','公園'],['night, city lights, neon','夜の街'],['cafe, indoors','カフェ'],['bathroom, steam','浴室'],['office, indoors','オフィス'],['shrine, torii, outdoors','神社'],['forest, nature, outdoors','森'],['rooftop, sky, clouds','屋上'],['','指定なし']];
+const CAMS = [['full body','全身'],['cowboy shot','太ももまで'],['upper body','上半身'],['portrait','顔アップ'],['from above','上から'],['from below','下から'],['from side','横から'],['from behind, looking back','後ろから振り返り'],['dutch angle','斜め構図'],['','指定なし']];
+function slotHTML(lb, it, key, extra){
+  if (!it) return `<div class="slot empty"><div><div class="lb">${lb}</div><div class="v">未選択 → タブで「${lb}に入れる」</div></div></div>`;
+  let img = `thumb/${it.id}.webp`; if (key==='style' && state.sel.styleColor!=='brown' && byId[`${it.id}-${state.sel.styleColor}`]) img = `thumb/${it.id}-${state.sel.styleColor}.webp`;
+  return `<div class="slot"><img src="${img}" alt=""><div><div class="lb">${lb}</div><div class="v">${it.jp}${extra||''}</div><div class="kbd">${it.tags}</div></div><button class="x" data-clear="${key}">外す</button></div>`;
+}
+function buildPrompt(){
+  const s = state.sel, o = state.opt; const parts = []; const pre = PREFIX[o.prefix];
+  if (pre[1]) parts.push(pre[1]);
+  const pose = s.pose && byId[s.pose]; const two = pose && pose.tags.includes('2girls');
+  parts.push(two ? '2girls' : '1girl, solo');
+  if (s.style){ parts.push(byId[s.style].tags); parts.push(COLOR_TAG[s.styleColor]); }
+  if (s.color){ parts.push(byId[s.color].tags) }
+  if (s.bangs){ parts.push(byId[s.bangs].tags) }
+  if (s.eye){ parts.push(byId[s.eye].tags) }
+  if (s.acc){ parts.push(byId[s.acc].tags) }
+  if (o.expr) parts.push(o.expr);
+  if (s.outfit) parts.push(byId[s.outfit].tags);
+  if (pose) parts.push(pose.tags.replace('2girls, ', ''));
+  if (o.cam && !(pose && /upper body|portrait|full body/.test(pose.tags))) parts.push(o.cam);
+  if (o.bg) parts.push(o.bg);
+  if (o.extra.trim()) parts.push(o.extra.trim());
+  // 重複タグを除く
+  const seen = new Set(); const tags = parts.join(', ').split(',').map(t=>t.trim()).filter(t => t && !seen.has(t) && seen.add(t));
+  const pos = o.fmt==='line' ? tags.join(',\n') : tags.join(', ');
+  return [pos, pre[2]];
+}
+function renderBuild(){
+  const s = state.sel, o = state.opt; const [pos, neg] = buildPrompt();
+  $('#view').innerHTML = `<div class="bl">
+   <div class="box"><h3>1. 選んだパーツ</h3>
+    ${slotHTML('髪型', s.style && byId[s.style], 'style', s.style ? `（${COLOR_JP[s.styleColor]}髪）` : '')}
+    ${slotHTML('前髪', s.bangs && byId[s.bangs], 'bangs')}
+    ${slotHTML('髪色', s.color && byId[s.color], 'color')}
+    ${slotHTML('髪飾り', s.acc && byId[s.acc], 'acc')}
+    ${slotHTML('目', s.eye && byId[s.eye], 'eye')}
+    ${slotHTML('衣装', s.outfit && byId[s.outfit], 'outfit')}
+    ${slotHTML('ポーズ', s.pose && byId[s.pose], 'pose')}
+    <div class="row"><button class="ghost" id="bRandom">🎲 全部ランダム</button><button class="ghost" id="bClear">全部外す</button></div>
+    <h3 style="margin-top:14px">2. 仕上げ</h3>
+    <div class="row"><label>品質タグ</label><select id="oPrefix">${Object.entries(PREFIX).map(([k,v])=>`<option value="${k}" ${o.prefix===k?'selected':''}>${v[0]}</option>`).join('')}</select></div>
+    <div class="row"><label>表情</label><select id="oExpr">${EXPR.map(([v,l])=>`<option value="${v}" ${o.expr===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="row"><label>構図</label><select id="oCam">${CAMS.map(([v,l])=>`<option value="${v}" ${o.cam===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="row"><label>背景</label><select id="oBg">${BGS.map(([v,l])=>`<option value="${v}" ${o.bg===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="row"><label>追加タグ</label><input type="text" id="oExtra" value="${o.extra.replace(/"/g,'&quot;')}" placeholder="例: large breasts, thighhighs, looking at viewer"></div>
+    <div class="row"><label>区切り</label><select id="oFmt"><option value="comma" ${o.fmt==='comma'?'selected':''}>カンマ区切り(1行)</option><option value="line" ${o.fmt==='line'?'selected':''}>1タグ1行</option></select></div>
+   </div>
+   <div class="box"><h3>3. できたプロンプト</h3>
+    <textarea id="tPos" readonly>${pos}</textarea>
+    <div class="row" style="margin-top:8px"><button class="big" id="cPos">プロンプトをコピー</button></div>
+    <h3 style="margin-top:14px">ネガティブ</h3>
+    <textarea class="neg" id="tNeg" readonly>${neg}</textarea>
+    <div class="row" style="margin-top:8px"><button class="ghost" id="cNeg">ネガティブをコピー</button><button class="ghost" id="cBoth">両方まとめてコピー</button></div>
+    <p class="kbd" style="margin-top:12px">同じタグは自動で1つにまとめています。ポーズに「2girls」が入ると1girlは外れます。髪色は「髪型」カードの色●か、「髪色」タブのどちらかで指定してください(両方入れると後の方が勝ちます)。</p>
+   </div></div>`;
+  const re = () => { save(); renderBuild() };
+  $('#oPrefix').onchange = e => { o.prefix = e.target.value; re() }; $('#oExpr').onchange = e => { o.expr = e.target.value; re() };
+  $('#oCam').onchange = e => { o.cam = e.target.value; re() }; $('#oBg').onchange = e => { o.bg = e.target.value; re() }; $('#oFmt').onchange = e => { o.fmt = e.target.value; re() };
+  $('#oExtra').onchange = e => { o.extra = e.target.value; re() };
+  $('#cPos').onclick = () => copy($('#tPos').value); $('#cNeg').onclick = () => copy($('#tNeg').value); $('#cBoth').onclick = () => copy('【Positive】\n' + $('#tPos').value + '\n\n【Negative】\n' + $('#tNeg').value);
+  $('#bRandom').onclick = () => { randomAll(); re() }; $('#bClear').onclick = () => { Object.assign(s, {style:null,bangs:null,color:null,acc:null,eye:null,outfit:null,pose:null,styleColor:'brown'}); re() };
+  document.querySelectorAll('[data-clear]').forEach(b => b.onclick = () => { s[b.dataset.clear] = null; re() });
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)] }
+function randomAll(){
+  const s = state.sel; const h = visible('hair');
+  s.style = pick(h.filter(i=>i.sub==='style')).id; s.styleColor = pick(Object.keys(COLOR_HEX)); s.color = null;
+  s.bangs = Math.random()<.7 ? pick(h.filter(i=>i.sub==='bangs')).id : null; s.acc = Math.random()<.5 ? pick(h.filter(i=>i.sub==='acc')).id : null;
+  s.eye = Math.random()<.6 ? pick(h.filter(i=>i.sub==='eye')).id : null;
+  s.outfit = pick(visible('outfit')).id; s.pose = pick(visible('pose').filter(i=>!i.tags.includes('2girls'))).id; save();
+}
+function updateSticky(){
+  const s = state.sel; const L = [];
+  if (s.style) L.push(['髪型', byId[s.style].jp + '・' + COLOR_JP[s.styleColor]]); if (s.bangs) L.push(['前髪', byId[s.bangs].jp]); if (s.color) L.push(['髪色', byId[s.color].jp]); if (s.acc) L.push(['髪飾り', byId[s.acc].jp]); if (s.eye) L.push(['目', byId[s.eye].jp]);
+  if (s.outfit) L.push(['衣装', byId[s.outfit].jp]); if (s.pose) L.push(['ポーズ', byId[s.pose].jp]);
+  $('#stickySel').innerHTML = L.length ? L.map(([k,v])=>`<span><b>${k}</b>${v}</span>`).join('') : '<span class="kbd">カードの「〜に入れる」で、髪型・衣装・ポーズを選んでいきます</span>';
+  $('#sticky').style.display = state.tab==='help' ? 'none' : '';
+}
+function renderHelp(){
+  $('#view').innerHTML = `<div class="help">
+   <h2>これは何？</h2><p>二次元キャラ用の「髪型・前髪・髪色・髪飾り・目の色・瞳の形」「衣装」「ポーズ」の素材集です。全部の画像を同じAIモデル・同じ設定で作っているので、カードどうしを見比べながら選べます。カードのタグはDanbooru形式で、Illustrious／NoobAI／Anima／NovelAI／Ponyなど、タグで動く画像生成AIにそのまま貼れます。</p>
+   <h2>使い方(3ステップ)</h2><ol><li>「髪型」「衣装」「ポーズ」のタブで、カードの<b>「〜に入れる」</b>を押す(髪型カードは色●で髪色も選べます)</li><li>画面下の<b>「組み立てを見る」</b>を押す</li><li>表情・構図・背景を選んで<b>「プロンプトをコピー」</b>。生成AIに貼るだけです</li></ol>
+   <h2>参照画像として使う</h2><p>カードの画像を押すと原寸が開きます。ポーズの「線画」はControlNet(lineart / canny)の入力にそのまま使えます。衣装の画像は「この衣装に着替えて」の参照画像、髪型の画像はキャラ固定の参照画像として使えます。</p>
+   <h2>タグの読み方</h2><p>衣装・ポーズの画像は、見比べやすいように<code>brown hair, medium hair, blunt bangs, brown eyes</code>の同じ子に着せています。カードのタグには<b>衣装・ポーズのタグだけ</b>が入っていて、キャラのタグは入っていません。自分のキャラに差し替えて使ってください。</p>
+   <h2>利用ルール</h2><ul><li>無償で使えます。クレジット表記は不要です</li><li>タグ・プロンプト・アプリは商用利用OK。画像は参照用(見本・ControlNetの下絵)としてお使いください。画像そのものを作品に入れて販売することはできません(生成モデルの規約によります)</li><li>画像そのもの(元サイズ・加工後を含む)の再配布・転載・再販はしないでください</li><li>実在の人物を表す用途、未成年を表す用途には使わないでください</li><li>素材を売るのではなく、素材を使って作った自分の作品で勝負してください</li></ul>
+   <h2>更新履歴</h2><p>${DB.built} 初版(髪型${DB.counts.hair}・衣装${DB.counts.outfit}・ポーズ${DB.counts.pose})</p>
+  </div>`;
+}
+function render(){ renderTabs(); if (state.tab==='build') renderBuild(); else if (state.tab==='help') renderHelp(); else renderList(state.tab); updateSticky(); window.scrollTo({top:0}) }
+function openLB(src, cap){ $('#lbImg').src = src; $('#lbCap').textContent = cap; $('#lb').classList.add('on') }
+$('#lb').onclick = () => $('#lb').classList.remove('on');
+$('#btnGoBuild').onclick = () => { state.tab = 'build'; render() };
+$('#btnRandom').onclick = () => { randomAll(); state.tab = 'build'; render(); toast('ランダムに組みました') };
+document.addEventListener('keydown', e => { if (e.key==='Escape') $('#lb').classList.remove('on') });
+render();
+</script>
+</body>
+</html>
