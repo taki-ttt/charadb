@@ -1,0 +1,65 @@
+キャラ組み立てDB(CharaDB) — ライセンス / License
+
+このリポジトリと Releases の配布物は、中身によって条件が分かれます。
+This repository and its Releases contain three kinds of material with different terms.
+
+====================================================================
+1. コード / Code  (app/index.html, scripts/)
+====================================================================
+
+MIT License
+
+Copyright (c) 2026 Taki (@taki_auto)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+====================================================================
+2. タグ表 / Tag data  (data/items_public.json, wildcards/)
+====================================================================
+
+CC0 1.0 Universal (Public Domain Dedication)
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Danbooruタグと日本語名の一覧は、自由に使ってください。表記不要。
+The tag list (Danbooru tags and Japanese labels) may be used for any purpose without attribution.
+
+(タグ表は CC0 1.0 相当として扱います / treated as CC0 1.0)
+
+====================================================================
+3. 画像 / Images  (Releases の zip 内 img/ thumb/ line/)
+====================================================================
+
+画像は MIT でも CC0 でもありません。次の条件で使えます。
+The images are NOT covered by the MIT / CC0 terms above. They are provided under these terms:
+
+  - 無償で使えます。クレジット表記は不要です。
+    Free to use. No credit required.
+  - 画像そのもの(元サイズ・加工後を含む)の再配布・転載・再販はしないでください。
+    Do not redistribute, repost or resell the images themselves (original or modified).
+  - 実在の人物を表す用途、未成年を表す用途には使わないでください。
+    Do not use them to depict real people or minors.
+  - 画像は Stable Diffusion WebUI と JANKU v4 (NoobAI-XL / Illustrious 系 checkpoint) で生成したものです。
+    生成モデル側の規約(NoobAI-XL 1.0 License / Fair AI Public License 1.0-SD)にも従ってください。
+    Generated with JANKU v4 (a NoobAI-XL / Illustrious-based checkpoint). The base models' terms
+    (NoobAI-XL 1.0 License / Fair AI Public License 1.0-SD) also apply.
+  - タグ・プロンプト・アプリは商用利用OK。画像は参照用(見本・ControlNetの下絵)としてお使いください。画像そのものを作品に入れて販売することはできません(生成モデルの規約によります)。
+    Tags, prompts and the app may be used commercially. Treat the images as reference material (samples / ControlNet guides); do not include the images themselves in works you sell (per the base model's terms).
+
+  免責: 画像は現状有姿で提供します。使用によって生じた結果について作者は責任を負いません。
+  Disclaimer: provided as-is, without warranty of any kind.

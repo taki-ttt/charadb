@@ -1,0 +1,12 @@
+# 画像は Releases の zip で配る(約220MB)。リポジトリには入れない
+img/
+thumb/
+line/
+data.js
+*.zip
+og.jpg
+
+# OS / editor
+.DS_Store
+Thumbs.db
+__pycache__/
